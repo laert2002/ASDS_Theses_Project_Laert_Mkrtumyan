@@ -1,0 +1,8 @@
+# Install PyTorch FIRST with the CUDA build that matches your GPU driver
+# (see README "Setup"), then: pip install -r requirements.txt
+torch>=2.4
+transformers>=4.56
+accelerate>=0.33
+datasets>=2.20
+pyyaml>=6.0
+jupyter

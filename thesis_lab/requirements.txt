@@ -1,0 +1,14 @@
+# Install PyTorch with CUDA first (see the root README), then:
+#   pip install -r thesis_lab/requirements.txt
+torch>=2.4            # 2.5+ recommended: native GQA in SDPA (enable_gqa)
+transformers>=4.56    # DynamicCache.layers, AttentionInterface, logits_to_keep, dtype=
+accelerate>=0.33
+datasets>=2.20        # Wikipedia streaming (also installs pandas)
+pyyaml>=6.0
+matplotlib>=3.7
+pandas>=2.0
+pytest>=7.0
+
+# Optional, only for experiments/e07 (real quantized KV cache):
+# optimum-quanto
+# hqq

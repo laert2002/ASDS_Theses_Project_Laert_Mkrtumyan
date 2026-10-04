@@ -1,0 +1,85 @@
+# Settings for all thesis_lab experiments. Every experiment reads this file;
+# command-line flags (--model, --quick) override a few values.
+
+model: meta-llama/Llama-3.2-1B
+model_large: meta-llama/Llama-3.1-8B
+dtype: float16
+device: cuda
+seed: 0
+
+data:
+  source: wikipedia        # wikipedia | file
+  file: null               # used when source == file
+  languages: [en, hy]      # English and Armenian (Wikipedia language codes)
+
+# Newest queries per forward pass that vote on token importance
+# (SnapKV observation window; also used by H2O/TOVA/Tiered/adaptive).
+score_window: 32
+
+# ---- named policies (referenced by the experiments below) -------------------
+# The budget (tokens per layer) is supplied by each experiment's sweep.
+policies:
+  full:            {type: full}
+  sliding_window:  {type: sliding_window}
+  streaming_llm:   {type: streaming_llm, sink: 4}
+  keynorm:         {type: keynorm, sink: 4, recent: 32}
+  h2o:             {type: h2o, recent: 0.5}
+  h2o_mean:        {type: h2o, recent: 0.5, aggregation: mean}        # lab variant: age-normalised
+  tova:            {type: tova}
+  snapkv:          {type: snapkv, kernel: 7, pooling: max}
+  h2o_pyramid:     {type: h2o, recent: 0.5, schedule: pyramid, pyramid_ratio: 0.5}
+  h2o_adaptive:    {type: h2o, recent: 0.5, schedule: adaptive}       # lab variant: entropy budgets
+  kivi4:           {type: kivi, bits: 4, group_size: 32, residual: 128}
+  kivi2:           {type: kivi, bits: 2, group_size: 32, residual: 128}
+  tiered4:         {type: tiered, low_bits: 4, group_size: 32}        # lab variant: demote, don't evict
+  tiered2:         {type: tiered, low_bits: 2, group_size: 32}
+
+# ---- e02: baseline scaling --------------------------------------------------
+baseline:
+  context_lengths: [1024, 2048, 4096, 8192, 16384, 32768, 65536]
+  decode_steps: 64
+  eager_max_len: 8192      # eager attention materialises (B,H,T,T): keep T modest
+
+# ---- e03: chunked prefill ----------------------------------------------------
+chunked_prefill:
+  context_length: 32768
+  chunk_sizes: [null, 8192, 4096, 2048, 1024, 512]
+  bounded:                 # eviction between chunks -> memory independent of T
+    policy: streaming_llm
+    budget: 2048
+    chunk: 1024
+    context_lengths: [8192, 16384, 32768, 65536, 131072]
+
+# ---- e04: quality (perplexity / bits-per-byte) --------------------------------
+quality:
+  eval_tokens: 8192
+  eval_chunk: 32
+  budgets: [256, 512, 1024, 2048]
+  policies: [full, sliding_window, streaming_llm, keynorm, h2o, h2o_mean, tova, snapkv,
+             h2o_pyramid, h2o_adaptive, kivi4, kivi2, tiered4, tiered2]
+
+# ---- e05: passkey retrieval --------------------------------------------------
+passkey:
+  context_lengths: [2048, 4096, 8192, 16384]
+  depths: [0.1, 0.3, 0.5, 0.7, 0.9]
+  trials: 5
+  budget: 1024
+  prefill_chunk: 1024
+  policies: [full, streaming_llm, keynorm, h2o, h2o_mean, snapkv, kivi2, tiered2]
+
+# ---- e06: efficiency of policies ----------------------------------------------
+efficiency:
+  context_lengths: [8192, 32768]
+  new_tokens: 128
+  budget: 1024
+  prefill_chunk: 2048
+  policies: [full, streaming_llm, keynorm, h2o, snapkv, kivi4, tiered4]
+  no_cache:                # recompute everything each step (compute extreme)
+    context_lengths: [512, 1024, 2048]
+    new_tokens: 16
+
+# ---- e07: Hugging Face built-in cache implementations --------------------------
+hf_caches:
+  context_lengths: [4096, 16384]
+  new_tokens: 128
+  implementations: [dynamic, static, offloaded, quantized_quanto_4, quantized_hqq_4]
