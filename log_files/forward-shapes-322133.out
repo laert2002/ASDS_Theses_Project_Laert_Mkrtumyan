@@ -1,0 +1,61 @@
+Loading weights:   0%|          | 0/146 [00:00<?, ?it/s]Loading weights:   1%|          | 1/146 [00:00<01:16,  1.90it/s]Loading weights:  27%|██▋       | 40/146 [00:00<00:01, 82.81it/s]Loading weights:  42%|████▏     | 61/146 [00:00<00:00, 98.50it/s]Loading weights:  54%|█████▍    | 79/146 [00:00<00:00, 104.36it/s]Loading weights:  65%|██████▌   | 95/146 [00:01<00:00, 108.11it/s]Loading weights:  77%|███████▋  | 112/146 [00:01<00:00, 112.20it/s]Loading weights:  86%|████████▋ | 126/146 [00:01<00:00, 118.39it/s]Loading weights: 100%|██████████| 146/146 [00:01<00:00, 102.42it/s]
+meta-llama/Llama-3.2-1B: layers=16 hidden=2048 heads=32 kv_heads=8 vocab=128256
+
+Prompt: 'The capital of France is'
+input_ids shape: (1, 6)  (batch, seq_len)
+tokens: ['<|begin_of_text|>', 'The', 'Ġcapital', 'Ġof', 'ĠFrance', 'Ġis']
+
+len(hidden_states) = 17  (= num_layers + 1)
+  hidden_states[ 0] embeddings       (1, 6, 2048)
+  hidden_states[ 1] after layer 1    (1, 6, 2048)
+  hidden_states[ 2] after layer 2    (1, 6, 2048)
+  hidden_states[ 3] after layer 3    (1, 6, 2048)
+  hidden_states[ 4] after layer 4    (1, 6, 2048)
+  hidden_states[ 5] after layer 5    (1, 6, 2048)
+  hidden_states[ 6] after layer 6    (1, 6, 2048)
+  hidden_states[ 7] after layer 7    (1, 6, 2048)
+  hidden_states[ 8] after layer 8    (1, 6, 2048)
+  hidden_states[ 9] after layer 9    (1, 6, 2048)
+  hidden_states[10] after layer 10   (1, 6, 2048)
+  hidden_states[11] after layer 11   (1, 6, 2048)
+  hidden_states[12] after layer 12   (1, 6, 2048)
+  hidden_states[13] after layer 13   (1, 6, 2048)
+  hidden_states[14] after layer 14   (1, 6, 2048)
+  hidden_states[15] after layer 15   (1, 6, 2048)
+  hidden_states[16] after layer 16   (1, 6, 2048)
+
+len(attentions) = 16  (= num_layers)
+  attentions[ 0] (1, 32, 6, 6)
+  attentions[ 1] (1, 32, 6, 6)
+  attentions[ 2] (1, 32, 6, 6)
+  attentions[ 3] (1, 32, 6, 6)
+  attentions[ 4] (1, 32, 6, 6)
+  attentions[ 5] (1, 32, 6, 6)
+  attentions[ 6] (1, 32, 6, 6)
+  attentions[ 7] (1, 32, 6, 6)
+  attentions[ 8] (1, 32, 6, 6)
+  attentions[ 9] (1, 32, 6, 6)
+  attentions[10] (1, 32, 6, 6)
+  attentions[11] (1, 32, 6, 6)
+  attentions[12] (1, 32, 6, 6)
+  attentions[13] (1, 32, 6, 6)
+  attentions[14] (1, 32, 6, 6)
+  attentions[15] (1, 32, 6, 6)
+
+logits shape: (1, 6, 128256)  (batch, seq_len, vocab_size)
+
+Check: rows sum to 1 -> max |sum-1| = 3.20e-04
+Check: causal mask   -> max value above diagonal = 0.00e+00
+
+======================================================================
+Attention size vs input length
+======================================================================
+     T |        shape per layer | MiB per layer | MiB all layers
+    16 |        (1, 32, 16, 16) |          0.02 |           0.25
+    64 |        (1, 32, 64, 64) |          0.25 |           4.00
+   256 |      (1, 32, 256, 256) |          4.00 |          64.00
+   512 |      (1, 32, 512, 512) |         16.00 |         256.00
+T x4 -> size x16
+T x4 -> size x16
+T x2 -> size x4
+[saved] results/forward_shapes.json

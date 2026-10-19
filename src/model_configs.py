@@ -20,6 +20,25 @@ from utils import load_config, save_json
 BYTES_PER_ELEMENT = {"float16": 2, "bfloat16": 2, "float32": 4}
 
 
+def load_model_config(model_id: str):
+    """Load a model config, skipping gated repos with a clear warning."""
+    try:
+        return AutoConfig.from_pretrained(model_id)
+    except Exception as exc:  # pragma: no cover - exercised by integration tests
+        msg = str(exc).lower()
+        if (
+            "gated" in msg
+            or "restricted" in msg
+            or "authorized" in msg
+            or "unauthorized" in msg
+            or "401" in msg
+            or "403" in msg
+        ):
+            print(f"[warn] Skipping {model_id}: access is restricted or the repo is gated.")
+            return None
+        raise
+
+
 def summarize(config, bytes_per_elem: int) -> dict:
     # Some configs (e.g. Llama-3.1-8B) don't store head_dim explicitly. Then it
     # is defined as hidden_size / num_attention_heads.
@@ -57,10 +76,17 @@ def main() -> None:
 
     summaries = {}
     for name, model_id in cfg["models"].items():
-        config = AutoConfig.from_pretrained(model_id)
+        config = load_model_config(model_id)
+        if config is None:
+            continue
         print("=" * 70, f"\n{model_id}  (full model.config)\n" + "=" * 70)
         print(config)  # the same object you get as model.config after loading
         summaries[model_id] = summarize(config, bpe)
+
+    if not summaries:
+        raise RuntimeError(
+            "No model configs could be loaded. Grant access to the gated repo(s) or update the entries in configs/default.yaml."
+        )
 
     ids = list(summaries)
     print("\nCOMPARISON (paste into docs/model_configs.md)\n")
